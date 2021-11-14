@@ -1,0 +1,30 @@
+.Frontpage{
+    border:1px solid red;
+    height:100vh;
+}
+.trackingsearch{
+    border:1px solid purple;
+    height:20rem;
+    width:50rem;
+    margin:0 auto;
+    text-align:center;
+    padding:2rem;
+    margin-bottom:1rem;
+    &--title{
+        font-size:2rem;
+        margin-bottom:3rem;
+    }
+    &--search{
+        width:25rem;
+        height:3rem;
+        padding:1rem;
+        border-radius:2rem;
+        border:none;
+        &:focus{
+            outline:none;
+        }
+    }
+}
+.calltoaction{
+    border:1px solid green;
+}

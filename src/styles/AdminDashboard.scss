@@ -1,0 +1,60 @@
+.dashboardbody{
+    // border:1px solid red;
+    margin:0;
+    display:flex;
+    height:100vh;
+    &--body{
+        border:1px solid purple;
+        width:100vw;
+        padding:1rem;
+    }
+}
+.adminsider{
+    border:1px solid red;
+    width:20rem;background-color:black;
+}
+
+.pendingorder-action{
+    display:flex;justify-content: space-between;
+    &--button-confirm{
+        border:none;background-color: #21cfa6;color:white;
+        padding:.3rem;
+        border-radius:3rem;
+        &:hover{
+            background-color:#0cf5be
+        }
+    }
+    &--button-cancel{
+        border:none;background-color: #cf2141;color:white;
+        padding:.3rem;
+        border-radius:3rem;
+        &:hover{
+            background-color:#f21f46
+        }
+    }
+}
+
+.infomodal{
+    width:60rem;margin:0 auto;padding:2rem;height:20rem;outline:none;
+    background-color:white;
+    margin-top:9.5rem;
+}
+.confirmmodal{
+    border:1px solid red;
+    width:50rem;height:10rem;padding:1rem;
+    margin:0 auto;margin-top:10rem;
+    background-color: white;
+    &--buttons{
+        display:flex;justify-content: space-between; margin:0 auto;
+        // border:1px solid blue;
+        width:10rem;
+        &-btn{
+            border:none;background-color:#21cfa6 ;
+            width:4rem;height:2rem;
+            &:hover{
+                color:white;
+                background-color:#0cf5be;
+            }
+        }
+    }
+}

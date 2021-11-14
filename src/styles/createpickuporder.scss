@@ -1,0 +1,28 @@
+.pickuppage{
+    display:flex;
+    justify-content: center;
+}
+.pickupform{
+    border:1px solid pink;
+    padding:1rem;
+    width:30rem;
+    height:auto;
+    margin-right:20rem;
+    &-searchbar{
+        border:1px solid red; display:flex; flex-direction: column;
+        &--label{
+            margin-bottom:0.5rem;
+        }
+        &--search{
+            height:2rem;
+            margin-bottom:0.5rem;padding:.5rem;border:none;
+            &:focus{
+                outline:none;border:none
+            }
+        }
+    }
+}
+
+.puforminstruction{
+    border:1px solid red;
+}

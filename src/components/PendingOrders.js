@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom';
 import {useState,useEffect} from 'react';
 import AdminHeader from './AdminHeader';
 import {db} from '../firebaseconfig';
-import {collection,getDocs,getDoc,doc,updateDoc} from 'firebase/firestore';
+import {collection,getDocs,getDoc,doc,updateDoc,query,where} from 'firebase/firestore';
 
 const PendingOrders = () => {
     const [isOpen,setisOpen] = useState(false);
@@ -47,7 +47,8 @@ const PendingOrders = () => {
     }
     useEffect(()=>{
         const getPickupOrders = async () => {
-            const data = await getDocs(OrdersCollectionRef)
+            const q = query(collection(db,"pickuporders"), where("status","==","pending"));
+            const data = await getDocs(q);
             setOrders(data.docs.map((doc)=>({...doc.data(),id:doc.id})))
         }
         getPickupOrders();
@@ -137,7 +138,7 @@ const PendingOrders = () => {
                   </thead>
                   <tbody>
                     {orders.map((order)=>(
-                    <tr>
+                      <tr>
                       <td>{order.id}</td>
                       <td>{order.name}</td>
                       <td><SimpleDateTime dateFormat="DMY" dateSeparator="/" showTime="0">{order.date}</SimpleDateTime></td>
@@ -145,13 +146,12 @@ const PendingOrders = () => {
                       <td>
                           <div class="pendingorder-action">
                             <button onClick = {()=>{showinfo(order.id)}}
-                             class="pendingorder-action--button-confirm">Show info</button>
+                              class="pendingorder-action--button-confirm">Show info</button>
                             <button onClick={()=>{confirmmodal(order.id)}}
-                             class="pendingorder-action--button-confirm">Confirm</button>
+                              class="pendingorder-action--button-confirm">Confirm</button>
                             <button class="pendingorder-action--button-cancel">Cancel</button>
-                          </div>
-                      </td>
-                    </tr>
+                           </div>
+                      </td></tr>
                     ))}
                   </tbody>
                 </table>

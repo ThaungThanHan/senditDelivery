@@ -3,12 +3,20 @@ import React, { Component } from 'react';
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {auth} from '../firebaseconfig'
-import { onAuthStateChanged } from '@firebase/auth';
+import { onAuthStateChanged, signOut, getAuth } from '@firebase/auth';
+import { useEffect } from 'react/cjs/react.development';
 const AdminHeader = () => {
         const [user,setUser] = useState({});
-        onAuthStateChanged(auth,(currentUser) => {
+        useEffect(()=>{
+          onAuthStateChanged(auth,(currentUser) => {
             setUser(currentUser)
         })
+        })
+
+        const signout = () => {
+          const auth = getAuth();
+          signOut(auth);
+        }
         return (
             <nav style={{marginLeft:0,zIndex:0}}className="main-header navbar navbar-expand navbar-white navbar-light">
             <ul className="navbar-nav">
@@ -20,7 +28,12 @@ const AdminHeader = () => {
               </li>
               <li className="nav-item d-none d-sm-inline-block">
                 <a href="#" className="nav-link">
-                    {user ? user.email : "Account"}
+                    {user ? user.email : null}
+                </a>
+              </li>
+              <li className="nav-item d-none d-sm-inline-block">
+                <a onClick={()=>signout()} className="nav-link">
+                    {user ? "Signout" : null }
                 </a>
               </li>
             </ul>

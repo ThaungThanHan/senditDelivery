@@ -7,7 +7,7 @@ import {auth} from '../firebaseconfig';
 import {db} from '../firebaseconfig';
 import {collection,getDoc,doc,updateDoc,query,where} from 'firebase/firestore';
 import { onAuthStateChanged, signInWithEmailAndPassword,getAuth } from '@firebase/auth';
-const AdminLogin  = () => {
+const DeliveryLogin  = () => {
         const [loginEmail,setloginEmail] = useState("");
         const [loginPass,setloginPass] = useState("")
         const [user,setUser] = useState({});
@@ -18,7 +18,8 @@ const AdminLogin  = () => {
 
         const login = async() => {
             try{
-                await signInWithEmailAndPassword(auth,loginEmail,loginPass);         
+                await signInWithEmailAndPassword(auth,loginEmail,loginPass);    
+                window.location.href="/delivery/dashboard"            
             }catch(error){
                 console.log(error.message);
             }
@@ -60,4 +61,4 @@ const AdminLogin  = () => {
         );
     };
 
-export default AdminLogin;
+export default DeliveryLogin;

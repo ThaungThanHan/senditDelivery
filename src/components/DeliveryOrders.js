@@ -6,24 +6,29 @@ import {Link} from 'react-router-dom';
 import {useState,useEffect} from 'react';
 import AdminHeader from './AdminHeader';
 import {db} from '../firebaseconfig';
-import {collection,getDocs,getDoc,doc,updateDoc,query,where} from 'firebase/firestore';
+import {collection,getDocs,getDoc,doc,updateDoc,addDoc,deleteDoc, query,where} from 'firebase/firestore';
+import {getAuth,onAuthStateChanged, sendEmailVerification} from '@firebase/auth';
+import {auth} from '../firebaseconfig'
 
-const PendingOrders = () => {
+const DeliveryOrders = () => {
     const [isOpen,setisOpen] = useState(false);
     const [isOpenConfirm,setisOpenConfirm] = useState(false);
     const [orders,setOrders] = useState([]);
     const [showOrder,setshowOrder] = useState([]);
+    const [User,setUser] = useState({});
     const [confirmOrder,setconfirmOrder] = useState([]);
-    const OrdersCollectionRef = collection(db,"pickuporders");
+    const PickupOrdersCollectionRef = collection(db,"pickuporders");
+    const OrdersCollectionRef = collection(db,"orders");
+    const ActionsCollectionRef = collection(db,"actions")
     
     const showinfo = async(id) => {
       // const q = query(collection(db,"pickuporders"), where("id","==",id));
-      const docRef = doc(db,"pickuporders",id);
+      const docRef = doc(db,"orders",id);
       const orderDoc = await getDoc(docRef);
       // setshowOrder(orderDoc.docs.map((doc)=>({...doc.data()})));
       console.log(orderDoc.data().name)
       setshowOrder(orderDoc.data());
-      console.log(window.location.href);
+      console.log(showOrder);
       setisOpen(true);
     }
 
@@ -33,26 +38,46 @@ const PendingOrders = () => {
     }
 
     const confirmmodal = async(id) => {
-      const docRef = doc(db,"pickuporders",id);
+      const docRef = doc(db,"orders",id);
       const orderDoc = await getDoc(docRef);
       setconfirmOrder(confirmOrder=>[...confirmOrder,orderDoc.data(),id]);
       setisOpenConfirm(true);
-      console.log(confirmOrder)
+
+
     }
-    const confirmorder = async(id) => {
-      const newtrackID = 'SI' + Math.floor(100000 + Math.random() * 900000);
-      const docRef = doc(db,"pickuporders",id);
-      const newField = {trackID:newtrackID,status:"ready for pickup"}
+    const confirmorder = async(id,userid) => {
+      const docRef = doc(db,"orders",id);
+      const newField = {status:"ready to deliver"};
       await updateDoc(docRef,newField);
-      window.location.href="/admin/dashboard"
+      const userRef = doc(db,"users",userid);
+      const userDoc = await getDoc(userRef);
+
+      if(userDoc && userDoc.data().city == "Yangon"){
+        var actiontype = "Arrived at Yangon Warehouse";
+      }else if(userDoc && userDoc.data().city == "Mandalay"){
+        var actiontype = "Arrived at Mandalay Warehouse";
+      }
+
+      const today = new Date();
+      const datetime = today.getDate() + '-' + today.getMonth() + '-' + today.getFullYear();
+      console.log(datetime)
+      console.log(actiontype)
+      await addDoc(ActionsCollectionRef,{datetime:datetime,doneby:userDoc.data().name,type:actiontype});
+
+      // console.log(orderDoc.data().address)
+
     }
     useEffect(()=>{
-        const getPickupOrders = async () => {
-            const q = query(collection(db,"pickuporders"), where("status","==","pending"));
+        const getOrders = async () => {
+            const q = query(collection(db,"orders"), where("status","==","picking up"));
             const data = await getDocs(q);
             setOrders(data.docs.map((doc)=>({...doc.data(),id:doc.id})))
         }
-        getPickupOrders();
+        getOrders();
+        onAuthStateChanged(auth,(currentUser) => {
+          setUser(currentUser);
+      })
+      console.log(User.uid)
     },[]);
     return(
     <div>
@@ -64,7 +89,6 @@ const PendingOrders = () => {
                             <tr>
                               <th>ID</th>
                               <th>Name</th>
-                              <th>Date</th>
                               <th>Phone</th>
                               <th>Address</th>
                               <th>City</th>
@@ -79,7 +103,6 @@ const PendingOrders = () => {
                             <tr>
                               <td>{showOrder.id}</td>
                               <td>{showOrder.name}</td>
-                              <td><SimpleDateTime dateFormat="DMY" dateSeparator="/" showTime="0">{showOrder.date}</SimpleDateTime></td>
                               <td><span class="tag tag-primary">{showOrder.phone}</span></td>
                               <td>{showOrder.address}</td>
                               <td>{showOrder.city}</td>
@@ -103,12 +126,12 @@ const PendingOrders = () => {
         <ReactModal isOpen={isOpenConfirm} className="confirmmodal">
           <h4 style={{textAlign:"center"}}>Are you sure you want to confirm? </h4>
           <div class="confirmmodal--buttons">
-            <button onClick={()=>{confirmorder(confirmOrder[1])}} class="confirmmodal--buttons-btn">Yes</button>
+            <button onClick={()=>{confirmorder(confirmOrder[1],User.uid)}} class="confirmmodal--buttons-btn">Yes</button>
             <button class="confirmmodal--buttons-btn">No</button>
           </div>
         </ReactModal>
 
-        <h3>Pending Orders</h3><hr/>
+        <h3>Your Orders</h3><hr/>
         <div style={{zIndex:0}} class="row">
           <div class="col-12">
             <div style={{zIndex:0}} class="card">
@@ -132,7 +155,6 @@ const PendingOrders = () => {
                     <tr>
                       <th>ID</th>
                       <th>Name</th>
-                      <th>Date</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
@@ -142,14 +164,13 @@ const PendingOrders = () => {
                       <tr>
                       <td>{order.id}</td>
                       <td>{order.name}</td>
-                      <td><SimpleDateTime dateFormat="DMY" dateSeparator="/" showTime="0">{order.date}</SimpleDateTime></td>
                       <td><span class="tag tag-primary">{order.status}</span></td>
                       <td>
                           <div class="pendingorder-action">
                             <button onClick = {()=>{showinfo(order.id)}}
                               class="pendingorder-action--button-confirm">Show info</button>
                             <button onClick={()=>{confirmmodal(order.id)}}
-                              class="pendingorder-action--button-confirm">Confirm</button>
+                              class="pendingorder-action--button-confirm">Done</button>
                             <button class="pendingorder-action--button-cancel">Cancel</button>
                            </div>
                       </td></tr>
@@ -165,4 +186,4 @@ const PendingOrders = () => {
     )
 }
 
-export default PendingOrders;
+export default DeliveryOrders;
